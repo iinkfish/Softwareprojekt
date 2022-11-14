@@ -22,7 +22,7 @@ int main()                                    // M  ain function
    char c2;
    char arrOut[50];
    char arrIn[50];
-   int count = 0; 
+   int count = 1; 
    int count2 = 0;
    char testarr[] = "loserLOL";
    int length = 0;
@@ -35,9 +35,10 @@ int main()                                    // M  ain function
 
    while(1){
     
-    if(c!=-1){
+    //if(c!=-1){
       c = fdserial_rxChar(toTerm);
-    }      
+      arrIn[0] = c; 
+    //}      
       
       while(c != '\r'){
         c = fdserial_rxChar(toTerm);
@@ -52,7 +53,7 @@ int main()                                    // M  ain function
         //fdserial_txChar(toTerm, arrOut[0]);
         //fdserial_txChar(toTerm, '\r');
         //c = ' '; 
-        count = 0;
+        count = 1;
      
 
       
