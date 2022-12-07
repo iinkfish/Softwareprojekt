@@ -1,0 +1,45 @@
+/*
+  Blank Simple Project.c
+  http://learn.parallax.com/propeller-c-tutorials 
+*/
+#include "simpletools.h"                      // Include simple tools
+#include "ping.h"
+#include "abdrive360.h"
+#include "servo.h"
+
+int distance;
+
+
+
+
+int main()                                   // Main function
+{
+  //pwm_start(1000);
+  //pwm_set(16, 0, 250);
+  servo_angle(16, 0);
+  pause(1000);
+  //servo_stop();
+
+  
+  while(1){
+    
+    distance = ping_cm(17);
+    //print("%c distance = %d%c cm", HOME, distance, CLREOL);
+    pause(5);
+    drive_speed(26,26);
+    if(distance <= 15){
+      drive_goto(0, 5);
+      drive_goto(10, 10);
+      //drive_speed(26,26);
+      }
+    if(distance >= 25)  {
+      drive_goto(5, 0);
+      drive_goto(10, 10);
+      //drive_speed(26,26);  
+      }
+    if((distance > 15)&&(distance < 25)){  
+      //distance = ping_cm(17);
+      drive_speed(26,26);  
+    }
+  }  
+}
