@@ -19,8 +19,8 @@ int main()                                    // M  ain function
    fdserial *wifiCon = fdserial_open(Rx, Tx, MODE, BAUDRATE);
 
    char c = NULL;
-   char c2 = 'A';
-   char c3 = 'A';
+   char c2 = 0;
+   char c3 = 0;
    char arrOut[50];
    char arrIn[50];
    int count = 1; 
@@ -37,9 +37,10 @@ int main()                                    // M  ain function
    while(1){
     // c2 = fdserial_rxCheck(TermCon);      //keep here in case rxReady just stays on the function and doesn't progress 
     c2 = fdserial_rxReady(TermCon);         //just puts -1 if nothing is in buffer otherwise return oldest byte (one that is typed first)
-    if(c2 > 0){ 
+    if(c2 > 0){
+            //  dprint(TermCon, "You typed something");
       c = fdserial_rxChar(TermCon); 
-      arrIn[0] = c2;                        //writes the oldest byte in the first position of the array
+      arrIn[0] = c;                        //writes the oldest byte in the first position of the array
       
       while(c != '\r'){
         c = fdserial_rxChar(TermCon);
@@ -48,10 +49,11 @@ int main()                                    // M  ain function
           count++;
           }
         }
-        fdserial_rxFlush(TermCon);
+        //fdserial_rxFlush(TermCon);
         //dprint(TermCon, "You typed: %c \r", arrIn[0]);
         count = 1;
         c = NULL; 
+        c2 = 0;
       
       length = strlen(arrIn);
       for(int i = 0; i < length; i++){
@@ -61,10 +63,13 @@ int main()                                    // M  ain function
    }  
     // c3 =fdserial_rxCheck(wifiCon);                   //keep here in case rxReady just stays on the function and doesn't progress 
     c3 =fdserial_rxReady(wifiCon);
+    pause(50);
+    //dprint(TermCon, "nach wifi ready \r");
      if(c3 > 0){
-      c = fdserial_rxChar(wifiCon)
+      c = fdserial_rxChar(wifiCon);
       arrIn[0] = c;    
-      
+     // dprint(TermCon, "nach ersten c in wificon \r");
+     
       while(c != '\r'){
         c = fdserial_rxChar(wifiCon);
         if(c != -1){
@@ -76,6 +81,8 @@ int main()                                    // M  ain function
         fdserial_rxFlush(wifiCon);
         count = 1;
         c = NULL;
+        c3 = 0;
+         //            dprint(TermCon, "nach c3 \r");
 
         length = strlen(arrIn);
         for(int i = 0; i < length; i++){
