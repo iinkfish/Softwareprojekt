@@ -2,44 +2,79 @@
   Blank Simple Project.c
   http://learn.parallax.com/propeller-c-tutorials 
 */
-#include "simpletools.h"                      // Include simple tools
+#include "simpletools.h"  
 #include "ping.h"
 #include "abdrive360.h"
 #include "servo.h"
+                                // Include simple tools
 
-int distance;
+volatile set_dist = 20;
+volatile mean_dist = 20;
+volatile sum_dist = 0;
+volatile errorVal = 0;
+volatile distance = 0;  
+volatile distance2 = 0;
+volatile speed = 26;                              
+volatile x = 0;
+volatile distance_front = 0;
+                                
+//ULTRA THREAD
+void thread1(){
 
-
-
-
-int main()                                   // Main function
-{
-  //pwm_start(1000);
-  //pwm_set(16, 0, 250);
-  servo_angle(16, 0);
-  pause(1000);
-  //servo_stop();
-
-  
+  float kp = 0.01;
   while(1){
-    
-    distance = ping_cm(17);
-    //print("%c distance = %d%c cm", HOME, distance, CLREOL);
-    pause(5);
-    drive_speed(26,26);
-    if(distance <= 15){
-      drive_goto(0, 5);
-      drive_goto(10, 10);
-      //drive_speed(26,26);
-      }
-    if(distance >= 25)  {
-      drive_goto(5, 0);
-      drive_goto(10, 10);
-      //drive_speed(26,26);  
-      }
-    if((distance > 15)&&(distance < 25)){  
-      //distance = ping_cm(17);
-      drive_speed(26,26);  
+    for(int n = 0; n < 20; n++){
+      distance = ping_cm(17);
+      sum_dist =  sum_dist + distance;
     }
+    mean_dist = sum_dist/20;
+    sum_dist = 0;    
+    pause(50);
+    //servo_angle(16, 150);
+    //distance2 = ping_cm(17);
+    //servo_angle(16, 0);
+    errorVal = set_dist - mean_dist;
+    speed = kp * errorVal;
+    //x++;
+    if(x >= 20){
+      servo_angle(16,900);
+      distance_front = ping_cm(17);
+      pause(200);
+
+      x = 0;
+      pause(200);
+      servo_angle(16, 0);   
+    }
+
   }  
 }
+  
+
+//LED thread
+void thread2(){
+  unsigned int speed2 = speed;
+  if(speed2 > 26) speed2 = 26;
+  while(1){
+    if(errorVal > 0)                    drive_speed(26,26 + speed2);
+    
+    if(errorVal < 0)                    drive_speed(26 + speed2,26);    
+
+    if(errorVal == 0)  drive_speed(26,26);  
+  }
+ }
+ 
+ int main(){
+   servo_angle(16, 0);
+   pause(2000);
+   drive_speed(26,26);
+    int *t1 = cog_run(&thread1, 100);
+    int *t2 = cog_run(&thread2, 100);
+    
+      while(1){
+      printf("speed: %d\n\n", speed);
+
+      pause(100);
+    }     
+   //cog_end(t2);
+   return 0;
+ }       
