@@ -6,8 +6,8 @@ import java.util.Scanner;
 
 public class client {
     public static void main(String[] args) throws IOException {
-        // String ip_address = "192.168.4.1";
-        String ip_address = "localhost";
+        String ip_address = "192.168.4.1";
+        // String ip_address = "localhost";
         // while (true) {
         Socket socket = new Socket(ip_address, 23);
 
@@ -25,8 +25,11 @@ public class client {
         String line = "";
         while (true) {
             boolean isFound = true;
+            //
             // Receiver:
             if (reader.ready()) {
+                System.out.println("In reader ready");
+
                 try {
                     line = reader.readLine(); // reads line from wifi module
                     System.out.println("server: " + line);
@@ -41,6 +44,8 @@ public class client {
 
             // Sender
             if (br.ready()) {
+                System.out.println("In br ready");
+
                 try {
                     // pr.println("String received");
                     // pr.flush();
@@ -50,6 +55,8 @@ public class client {
                     writer.write(output); // sends line to wifi module
                     writer.newLine();
                     writer.flush();
+                    System.out.println("writer flushed");
+
                     // writer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
