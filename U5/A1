@@ -2,21 +2,28 @@
   Blank Simple Project.c
   http://learn.parallax.com/propeller-c-tutorials 
 */
+
 #include "simpletools.h"  
 #include "ping.h"
 #include "abdrive360.h"
 #include "servo.h"
-                                // Include simple tools
-#define TR 200
+                                  // Include simple tools
+#define TR 50
+#define SPEED 26        
+#define KP 5                      //BEST:   5
+#define KI 0.02                   //BEST:   0.05
+#define MAXI 100                  //BEST:   100
+#define MAXCOR 10                 //BEST:   15
 
 //variablen für threads
 volatile set_dist = 20;
 volatile mean_dist = 20;
 volatile sum_dist = 0;
-volatile errorVal = 0;
+volatile errorVal = 0.0;
+volatile errorIntegrator = 0.0; 
 volatile distance = 0;  
 volatile distance2 = 0;
-volatile speed = 26;                              
+volatile correction = 0.0;                              
 volatile x = 0;
 volatile distance_front = 0;
 
@@ -24,60 +31,62 @@ volatile distance_front = 0;
 //thread for PI 
 void thread1(){
 
-  int errorIntegrator = 0; 
-  float kp = 0.01;
-  float ki = 0.01; 
+
 
   while(1){
-    distance = ping_cm(17);
+
 
     errorVal = set_dist - distance;
     errorIntegrator += errorVal; 
+    
+    if(errorIntegrator > MAXI) errorIntegrator = MAXI;
+    if(errorIntegrator < -MAXI) errorIntegrator = -MAXI;
 
-    speed = kp * errorVal + ki*errorIntegrator; 
 
-    if(speed > 15) speed = 15;
-    if(speed < -15) speed = -15;
+    correction = KP * errorVal + KI*errorIntegrator; 
+
+    if(correction > MAXCOR) correction = MAXCOR;
+    if(correction < -MAXCOR) correction = -MAXCOR;
   }
 }
   
 
 //thread for driving
 void thread2(){
-  unsigned int speed2 = speed;
+ // unsigned int speed2 = speed;
   // if(speed2 > 26) speed2 = 26;
 
   //3,25 mm pro tick -> 26 tick/s *3,25 mm/tick = 84,5 mm/s
   while(1){
-    if(errorVal > 0) {
-      drive_speed(26,26 + speed2);
-      pause(TR);
-      drive_speed(26,26);  
-    }                
-    
-    if(errorVal < 0) {
-      drive_speed(26 + speed2,26);
-      pause(TR);
-      drive_speed(26,26);   
-    }                    
-
-    if(errorVal == 0)                   drive_speed(26,26);  
+    drive_speed(SPEED - correction, SPEED + correction);
+    pause(TR);
+    drive_speed(SPEED, SPEED);
+    if(distance2 < 10)  drive_goto(-25, 26);
   }
  }
 
  void thread3(){
-
+    while(1){
+      servo_angle(16, 0);
+      for (x = 0; x < 800; x++){
+        distance = ping_cm(17);
+      }
+      servo_angle(16, 900);
+      pause(500);
+      distance2 = ping_cm(17);     
+    }
  }
  
  int main(){
    servo_angle(16, 0);
    pause(2000);
-   drive_speed(26,26);
+   drive_speed(SPEED, SPEED);
     int *t1 = cog_run(&thread1, 100);
     int *t2 = cog_run(&thread2, 100);
+    int *t3 = cog_run(&thread3, 100);
     
       while(1){
-      printf("speed: %d\n\n", speed);
+      printf("correction: %d\n\nintegrator: %d\n\n", correction, errorIntegrator);
 
       pause(100);
     }     
