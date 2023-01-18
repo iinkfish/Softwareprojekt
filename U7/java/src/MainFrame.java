@@ -14,7 +14,7 @@ public class MainFrame extends JFrame {
     final private Font mainFont = new Font("Segoe print", Font.BOLD, 18);
     JTextField tfFirstName, tfLastName;
     JLabel lbWelcome;
-    public static String movement = "";
+    public static String movement = "TEST";
     private Timer trigger;
     private Timer trigger2;
     private Timer trigger3;
@@ -94,7 +94,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lbWelcome.setText("Move Forward");
-                movement = "FW";
+                Main.movement = "FW";
 
             }
         });
@@ -121,7 +121,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lbWelcome.setText("Move Left");
-                movement = "ML";
+                Main.movement = "ML";
 
             }
         });
@@ -148,7 +148,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lbWelcome.setText("Move Backward");
-                movement = "BW";
+                Main.movement = "BW";
 
             }
         });
@@ -175,7 +175,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lbWelcome.setText("Move Right");
-                movement = "MR";
+                Main.movement = "MR";
 
             }
         });
@@ -254,70 +254,11 @@ public class MainFrame extends JFrame {
 
         add(mainPanel);
 
-        setTitle("Welcome");
+        setTitle("Controls");
         setSize(500, 150); // set dimensions to the entire window
         setMinimumSize(new Dimension(300, 100));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    public static void main(String[] args) throws IOException {
-        MainFrame myFrame = new MainFrame();
-        myFrame.initialize();
-
-        // String ip_address = "192.168.4.1";
-        String ip_address = "localhost";
-        // while (true) {
-        Socket socket = new Socket(ip_address, 23);
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // reading from wifi
-                                                                                                    // module
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); // writing to wifi
-                                                                                                      // module
-        // PrintWriter pr = new PrintWriter(socket.getOutputStream());
-        InputStreamReader r = new InputStreamReader(System.in); // reading from terminal
-        BufferedReader br = new BufferedReader(r);
-
-        // Scanner myInput = new Scanner(System.in);
-        // String output = "";
-
-        String line = "";
-        while (true) {
-            boolean isFound = true;
-            // Receiver:
-            if (reader.ready()) {
-                try {
-                    line = reader.readLine(); // reads line from wifi module
-                    System.out.println("server: " + line);
-                    // System.out.println(line);
-                    // isFound = line.indexOf("exit") != -1 ? false : true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // System.out.println("exit of while loop");
-
-            // Sender
-            // if (br.ready()) {
-            if (movement != "") {
-
-                try {
-                    // pr.println("String received");
-                    // pr.flush();
-                    // System.out.println("Your Input pls");
-                    // movement = br.readLine(); // reads line from this terminal
-                    // output = myInput.nextLine();
-                    writer.write(movement); // sends line to wifi module
-                    writer.newLine();
-                    writer.flush();
-                    movement = "";
-                    // writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
 }
