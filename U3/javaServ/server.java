@@ -21,10 +21,12 @@ public class server {
 
         Scanner myInput = new Scanner(System.in);
         String output = "";
+        String data = "{ \"a\": 50, \"d\": 310, \"h\": 288, \"x\": 126, \"y\": -381, \"z\": -519, \"s\": 218, \"f\": 333 }";
 
         PrintWriter pr = new PrintWriter(s.getOutputStream());
 
-        writer.write("Are you there?");
+        // writer.write("Are you there?");
+        writer.write(data);
         writer.newLine();
         writer.flush();
         while (true) {
