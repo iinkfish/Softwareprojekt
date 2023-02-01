@@ -5,12 +5,13 @@ import java.util.Scanner;
 communication MyComms = new communication();
 boolean pinged = true;
 String time = "hoi";
-//String ip_address = "localhost";
-String ip_address = "192.168.4.1";
-String receiveMsg = "null";
+String ip_address = "localhost";
+//String ip_address = "192.168.4.1";
+String receiveMsg = "{ \"a\": 50, \"d\": 310, \"h\": 288, \"x\": 126, \"y\": -381, \"z\": -519, \"s\": 218, \"f\": 333 }";
 int port = 23; 
 int centerX = 500;
 int centerY = 500;
+int centerYOffset = 75;
 float distanceToPixel = 500/500;
 
 parseCommunication dataParse = new parseCommunication();
@@ -25,20 +26,21 @@ void setup(){
   background(0);
   noFill();
   //MyComms.emptyPrint();
-    try{
-      socket = MyComms.initSocket(ip_address, port);
-      reader = MyComms.startReader(socket);
-      writer = MyComms.startWriter(socket);
-  } catch (IOException e){
-    e.printStackTrace();
-  }
+    //try{
+      //socket = MyComms.initSocket(ip_address, port);
+      //reader = MyComms.startReader(socket);
+      //writer = MyComms.startWriter(socket);
+  //} catch (IOException e){
+  //  e.printStackTrace();
+  //}
 }
 
 
 void draw(){
   //thread("MyComms.receiveMsg(reader)");
 
-    receiveMsg = MyComms.receiveMsg(reader);
+    //receiveMsg = MyComms.receiveMsg(reader);
+    
 if(receiveMsg != null){
    //parseData(receiveMsg);
    dataParse.dataSet(receiveMsg);
@@ -46,13 +48,22 @@ if(receiveMsg != null){
    println("Winkel: " + dataParse.a + " Distanz: " + dataParse.d + " Heading: " + dataParse.h + " MagX: " + dataParse.x + " MagY: " + dataParse.y + " MagZ: " + dataParse.z + " FrontLaser: " + dataParse.f + " SideLaser: " + dataParse.s );
 }
   if(pinged){
-    MyComms.sendMsg(writer, "Hello");
+    //MyComms.sendMsg(writer, "Hello");
     pinged = false;  
   }
   //background(0);
   //circle(500, 500, 300);
   //stroke(255, 153, 0);
   //rect(500, 500, 300, 300);
+    background(0);
+  noFill();
+  stroke(255, 153, 0);
+  line(500, 0, 500, 1000);
+  line(0, 500, 1000, 500);
+  circle(500, 500, 300);
+  circle(500, 500, 500);
+  circle(500, 500, 700);
+  circle(500, 500, 900);
   
   drawCoordinateSystem();
   drawbot();
@@ -66,20 +77,12 @@ public void changeVariable(){
 }
 
 public void  drawbot(){
-  background(0);
-  noFill();
-  stroke(255, 153, 0);
-  line(500, 0, 500, 1000);
-  line(0, 500, 1000, 500);
-  circle(500, 500, 300);
-  circle(500, 500, 500);
-  circle(500, 500, 700);
-  circle(500, 500, 900);
+
   
   fill(0, 200);
   
   stroke(255);
-  translate(centerX, centerY);
+  translate(centerX, centerY+centerYOffset);
   rotate(0);
   rectMode(CENTER);
   rect(0, 0, 150, 250, 20);
@@ -88,7 +91,6 @@ public void  drawbot(){
   rotate(radians(90-dataParse.a));
   rect(0, 0, 80, 20, 10);
   rotate(radians(180));
-  
   line(0, 0, 0, distanceToPixel*(float)dataParse.d);
 }
 
