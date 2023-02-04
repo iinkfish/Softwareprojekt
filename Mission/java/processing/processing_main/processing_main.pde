@@ -1,100 +1,91 @@
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import controlP5.*;
 //String IP_ADDRESS = "localhost";
 communication MyComms = new communication();
-boolean pinged = true;
-String time = "hoi";
+bot bot1 = new bot();
+dot dots1 = new dot();
+parseCommunication dataParse = new parseCommunication();
+compass compass1 = new compass();
+lasers laser1 = new lasers();
+ui ui1 = new ui();
+ControlP5 cp5;
 String ip_address = "localhost";
-//String ip_address = "192.168.4.1";
-String receiveMsg = "{ \"a\": 50, \"d\": 310, \"h\": 288, \"x\": 126, \"y\": -381, \"z\": -519, \"s\": 218, \"f\": 333 }";
 int port = 23; 
+//String ip_address = "192.168.4.1";
+String receiveMsg = "null";
 int centerX = 500;
 int centerY = 500;
-int centerYOffset = 75;
 float distanceToPixel = 500/500;
-
-parseCommunication dataParse = new parseCommunication();
-
+int counter = 0;
+int NOM = 19;
 BufferedReader reader;
 BufferedWriter writer;
 Socket socket;
-
+int anglesH[] = new int[NOM];
+int distancesH[] = new int [NOM];
+String latestKey =  "1";
+//int anglesH[] = {10, 20, 30, 70, 90};
+//int distancesH[] = {310, 200, 100, 800, 50}; 
 
 void setup(){
   size(1000, 1000); 
   background(0);
   noFill();
-  //MyComms.emptyPrint();
-    //try{
-      //socket = MyComms.initSocket(ip_address, port);
-      //reader = MyComms.startReader(socket);
-      //writer = MyComms.startWriter(socket);
-  //} catch (IOException e){
-  //  e.printStackTrace();
-  //}
+  cp5 = new ControlP5(this);
+  
+  cp5.addSlider("PixPerMM")
+    .setRange(0.25, 5)
+    .setValue(1)
+    .setPosition(0, 965)
+    .setSize(120, 15);
+    ;
+
+  cp5.addSlider("FieldStrength")
+    .setRange(0, 5000)
+    .setValue(0)
+    .setPosition(0, 985)
+    .setSize(250, 15)
+    ;
+  
+    try{
+      socket = MyComms.initSocket(ip_address, port);
+      reader = MyComms.startReader(socket);
+      writer = MyComms.startWriter(socket);
+  } catch (IOException e){
+    e.printStackTrace();
+  }
 }
 
 
 void draw(){
-  //thread("MyComms.receiveMsg(reader)");
 
-    //receiveMsg = MyComms.receiveMsg(reader);
+  receiveMsg = MyComms.receiveMsg(reader);
     
 if(receiveMsg != null){
-   //parseData(receiveMsg);
-   dataParse.dataSet(receiveMsg);
-   
+   dataParse.dataSet(receiveMsg);   
    println("Winkel: " + dataParse.a + " Distanz: " + dataParse.d + " Heading: " + dataParse.h + " MagX: " + dataParse.x + " MagY: " + dataParse.y + " MagZ: " + dataParse.z + " FrontLaser: " + dataParse.f + " SideLaser: " + dataParse.s );
+   anglesH[counter]= dataParse.a;
+   distancesH[counter] = dataParse.d;
+   counter ++;
+   if(counter >= NOM) counter =0;
 }
-  if(pinged){
-    //MyComms.sendMsg(writer, "Hello");
-    pinged = false;  
-  }
-  //background(0);
-  //circle(500, 500, 300);
-  //stroke(255, 153, 0);
-  //rect(500, 500, 300, 300);
-    background(0);
-  noFill();
-  stroke(255, 153, 0);
-  line(500, 0, 500, 1000);
-  line(0, 500, 1000, 500);
-  circle(500, 500, 300);
-  circle(500, 500, 500);
-  circle(500, 500, 700);
-  circle(500, 500, 900);
-  
+ 
+
   drawCoordinateSystem();
-  drawbot();
+  bot1.display(dataParse.d, dataParse.a);
+  laser1.display(dataParse.f, dataParse.s);
+  compass1.displayHeading(dataParse.h);
+  compass1.displayfieldComponents(dataParse.x, dataParse.y, dataParse.z);
+  dots1.drawDots(anglesH, distancesH, NOM);
+  //ui1.fieldStrength(dataParse.x, dataParse.y, dataParse.z);
+  cp5.getController("FieldStrength").setValue(ui1.getMag(dataParse.x, dataParse.y, dataParse.z));
+  //ui1.distanceMode(latestKey, distanceToPixel);
   
-  
-}
-
-
-public void changeVariable(){
-  time = "thread exec";
-}
-
-public void  drawbot(){
-
-  
-  fill(0, 200);
-  
-  stroke(255);
-  translate(centerX, centerY+centerYOffset);
-  rotate(0);
-  rectMode(CENTER);
-  rect(0, 0, 150, 250, 20);
-  translate(0, -125);
-  
-  rotate(radians(90-dataParse.a));
-  rect(0, 0, 80, 20, 10);
-  rotate(radians(180));
-  line(0, 0, 0, distanceToPixel*(float)dataParse.d);
 }
 
 public void drawCoordinateSystem(){
+  background(0);
   noFill();
   stroke(255, 153, 0);
   line(500, 0, 500, 1000);
@@ -105,9 +96,36 @@ public void drawCoordinateSystem(){
   circle(500, 500, 900);
 }
 
+public void distanceModeSelect(String pressedKey){
+
+   switch(pressedKey){
+     case "1":
+       println("Far Mode");
+       distanceToPixel = 500.0/700.0;
+       break;
+     case "2":
+       println("Mid Mode");
+       distanceToPixel = 500.0/500.0;
+       break;
+     case "3": 
+       println("Near Mode");
+       distanceToPixel = 500.0/100.0;
+     default:
+       break; 
+   }
+}
+
+void PixPerMM(float theRes) {
+  distanceToPixel = (float)theRes;
+  println("a slider event. setting resolutionn to "+theRes);
+}
+
 void keyPressed(){
-  String latestKey;
-  latestKey = Character.toString(key);
-  MyComms.sendMsg(writer, latestKey);
+  String latestKey= Character.toString(key);
+  if((key != 'v') || (key != '1') || (key != '2') || (key != '3')){
+    MyComms.sendMsg(writer, latestKey);
+  }
+  //distanceModeSelect(latestKey);
+  
   //println(key);
 }
