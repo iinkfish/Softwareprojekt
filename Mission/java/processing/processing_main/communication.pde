@@ -34,8 +34,9 @@ class communication {
                 line = reader.readLine(); // reads line from wifi module
                 //System.out.println("server: " + line);
                 }    
-             } catch (IOException e) {
-                e.printStackTrace();
+             } catch (Exception e) {
+                //e.printStackTrace();
+                println("Exception in receiveMsg function");
             }
            return line;
          }

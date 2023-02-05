@@ -1,3 +1,4 @@
+
 class parseCommunication{
   private int a;
   private int d;
@@ -7,11 +8,19 @@ class parseCommunication{
   private int z;
   private int s;
   private int f;
+  private JSONObject json = null;
+
   
   public void dataSet(String message){
-    JSONObject json = parseJSONObject(message);
+
+    try{
+      json = parseJSONObject(message);
+    } catch (Exception e){
+      println("Message did not start with {");
+      json = null;
+    }
     if (json == null) {
-      println("JSONObject could not be parsed");
+      println(message);
     } else {
       this.a = json.getInt("a");
       this.d = json.getInt("d");

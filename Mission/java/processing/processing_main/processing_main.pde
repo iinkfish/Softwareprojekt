@@ -1,8 +1,8 @@
 import java.io.*;
 import java.net.*;
 import controlP5.*;
-//String IP_ADDRESS = "localhost";
-String ip_address = "192.168.4.1";
+String ip_address = "localhost";
+//String ip_address = "192.168.4.1";
 int port = 23; 
 communication MyComms = new communication();
 bot bot1 = new bot();
@@ -17,13 +17,24 @@ int centerX = 500;
 int centerY = 500;
 float distanceToPixel = 500/500;
 int counter = 0;
-int NOM = 20;
+int NOM = 5;
+int HistorySize = 3;
 BufferedReader reader;
 BufferedWriter writer;
 Socket socket;
 int anglesH[] = new int[NOM];
 int distancesH[] = new int [NOM];
 int distancesHL[] = new int [NOM];
+int anglesH2[] = new int[NOM];
+int distancesH2[] = new int [NOM];
+int distancesHL2[] = new int [NOM];
+int anglesH3[] = new int[NOM];
+int distancesH3[] = new int [NOM];
+int distancesHL3[] = new int [NOM];
+int anglesH4[] = new int[NOM];
+int distancesH4[] = new int [NOM];
+int distancesHL4[] = new int [NOM];
+int history = 0;
 String latestKey =  "1";
 boolean ultrasonicToggle = true;
 boolean laserToggle = true;
@@ -49,21 +60,67 @@ void setup(){
     .setPosition(0, 985)
     .setSize(250, 15)
     ;
+    
+      // create a toggle
+  cp5.addToggle("Previous")
+     .setPosition(960,960)
+     .setSize(50,20)
+     .setValue(true)
+     .setMode(ControlP5.SWITCH)
+     ;
+  
+    
+      // create a toggle
+  cp5.addToggle("History1")
+     .setPosition(960,940)
+     .setSize(50,20)
+     .setValue(false)
+     .setMode(ControlP5.SWITCH)
+     ;
+     
+     // create a toggle
+  cp5.addToggle("History2")
+     .setPosition(960,920)
+     .setSize(50,20)
+     .setValue(false)
+     .setMode(ControlP5.SWITCH)
+     ;
+     
+       // create a toggle
+  cp5.addToggle("History3")
+     .setPosition(960,900)
+     .setSize(50,20)
+     .setValue(false)
+     .setMode(ControlP5.SWITCH)
+     ;
+     
+     
+       // create a toggle
+  cp5.addToggle("History4")
+     .setPosition(960,880)
+     .setSize(50,20)
+     .setValue(false)
+     .setMode(ControlP5.SWITCH)
+     ;
   
     try{
       socket = MyComms.initSocket(ip_address, port);
       reader = MyComms.startReader(socket);
       writer = MyComms.startWriter(socket);
-  } catch (IOException e){
+  } catch (Exception e){
     e.printStackTrace();
+    //println("IO Exception");
   }
 }
 
 
 void draw(){
+  //println("hello");
 
   receiveMsg = MyComms.receiveMsg(reader);
   //println(receiveMsg);
+  
+  //debugHistory();
     
 if(receiveMsg != null){
    dataParse.dataSet(receiveMsg);   
@@ -72,7 +129,9 @@ if(receiveMsg != null){
    distancesH[counter] = dataParse.d;
    distancesHL[counter] = dataParse.f;
    counter ++;
-   if(counter >= NOM) counter =0;
+   if(counter >= NOM){ 
+     counter =0;
+   }
 }
  
 
@@ -81,7 +140,26 @@ if(receiveMsg != null){
   laser1.display(dataParse.f, dataParse.s);
   compass1.displayHeading(dataParse.h);
   compass1.displayfieldComponents(dataParse.x, dataParse.y, dataParse.z);
-  dots1.drawDots(anglesH, distancesH, distancesHL, NOM);
+  
+  switch(history){
+    case 0:
+      dots1.drawDots(anglesH, distancesH, distancesHL, HistorySize, NOM, history);
+      break;
+    case 1:
+      dots1.drawDots(anglesH2, distancesH2, distancesHL2, HistorySize, NOM, history);
+      break;
+    case 2:
+      dots1.drawDots(anglesH3, distancesH3, distancesHL3, HistorySize, NOM, history);
+      break;
+    case 3:
+      dots1.drawDots(anglesH4, distancesH4, distancesHL4, HistorySize, NOM, history);
+      break;
+    default:
+      dots1.drawDots(anglesH, distancesH, distancesHL, HistorySize, NOM, history);
+      break;
+  }
+  
+  
   //ui1.fieldStrength(dataParse.x, dataParse.y, dataParse.z);
   cp5.getController("FieldStrength").setValue(ui1.getMag(dataParse.x, dataParse.y, dataParse.z));
   //ui1.distanceMode(latestKey, distanceToPixel);
@@ -100,34 +178,85 @@ public void drawCoordinateSystem(){
   circle(500, 500, 900);
 }
 
-public void distanceModeSelect(String pressedKey){
-
-   switch(pressedKey){
-     case "1":
-       println("Far Mode");
-       distanceToPixel = 500.0/700.0;
-       break;
-     case "2":
-       println("Mid Mode");
-       distanceToPixel = 500.0/500.0;
-       break;
-     case "3": 
-       println("Near Mode");
-       distanceToPixel = 500.0/100.0;
-     default:
-       break; 
-   }
-}
-
 void PixPerMM(float theRes) {
   distanceToPixel = (float)theRes;
   println("a slider event. setting resolutionn to "+theRes);
 }
 
+void Previous(boolean theFlag) {
+  if(theFlag == true){
+    history = 0;
+    cp5.getController("History1").setValue(0);
+    cp5.getController("History2").setValue(0);
+    cp5.getController("History3").setValue(0);
+    cp5.getController("History4").setValue(0);
+  }
+}
+
+void History1(boolean theFlag) {
+  if(theFlag == true){
+    history = 1;
+    cp5.getController("Previous").setValue(0);
+    cp5.getController("History2").setValue(0);
+    cp5.getController("History3").setValue(0);
+    cp5.getController("History4").setValue(0);
+  }
+}
+
+void History2(boolean theFlag) {
+  if(theFlag == true){
+    history = 2;
+    cp5.getController("Previous").setValue(0);
+    cp5.getController("History1").setValue(0);
+    cp5.getController("History3").setValue(0);
+    cp5.getController("History4").setValue(0);
+  }
+}
+
+void History3(boolean theFlag) {
+  if(theFlag == true){
+    history = 3;
+    cp5.getController("Previous").setValue(0);
+    cp5.getController("History2").setValue(0);
+    cp5.getController("History1").setValue(0);
+    cp5.getController("History4").setValue(0);
+  }
+}
+
+void saveDraw(String latestKey){
+
+  for(int i = 0; i<NOM; i++){
+    switch(latestKey){
+      case "1":
+        anglesH2[i] = anglesH[i];;
+        distancesH2[i] = distancesH[i];
+        distancesHL2[i] = distancesHL[i];
+        break;
+       case "2":
+        anglesH3[i] = anglesH[i];
+        distancesH3[i] = distancesH[i];
+        distancesHL3[i] = distancesHL[i];
+        break;
+       case "3":
+        anglesH4[i] = anglesH[i];
+        distancesH4[i] = distancesH[i];
+        distancesHL4[i] = distancesHL[i];
+         break;
+       default:
+         break; 
+    }
+  }
+}
+
+
+
 void keyPressed(){
   String latestKey= Character.toString(key);
-  if((key != 'v') || (key != '1') || (key != '2') || (key != '3')){
+  if((key != 'v') && (key != '1') && (key != '2') && (key != '3')){
     MyComms.sendMsg(writer, latestKey);
+  }else{
+    saveDraw(latestKey);
+    println("savedraw");
   }
   //distanceModeSelect(latestKey);
   

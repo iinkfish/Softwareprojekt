@@ -21,17 +21,17 @@ private String sl;
 
   
 
-  public void drawDots(int anglesH[], int distancesH[], int distancesHL[], int numberOfDots){
+  public void drawDots(int anglesH[], int distancesH[], int distancesHL[], int historySize, int numberOfDots, int historyIndex){
     
+    //println(historyIndex);
+   
     
-    
-    for(int i = 0; i<numberOfDots; i++){
+    for(int i = 0; i<(numberOfDots); i++){
       x = (float)distancesH[i]*distanceToPixel*cos(radians(anglesH[i]));
       y = (float)distancesH[i]*distanceToPixel*sin(radians(anglesH[i]));
       xl = (float)distancesHL[i]*distanceToPixel*cos(radians(anglesH[i]));
       yl = (float)distancesHL[i]*distanceToPixel*sin(radians(anglesH[i]));
-      //print(xl);
-      //println(yl);
+      
       
       maximumX = (Math.abs(x)>=Math.abs(y));
       maximumY = (Math.abs(y)>Math.abs(x));
