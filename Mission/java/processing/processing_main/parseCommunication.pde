@@ -8,10 +8,11 @@ class parseCommunication{
   private int z;
   private int s;
   private int f;
+  private int fe;
   private JSONObject json = null;
 
   
-  public void dataSet(String message){
+  public boolean dataSet(String message){
 
     try{
       json = parseJSONObject(message);
@@ -21,6 +22,7 @@ class parseCommunication{
     }
     if (json == null) {
       println(message);
+      return false;
     } else {
       this.a = json.getInt("a");
       this.d = json.getInt("d");
@@ -30,6 +32,8 @@ class parseCommunication{
       this.z = json.getInt("z");
       this.s = json.getInt("s");
       this.f = json.getInt("f");
+      this.fe =json.getInt("FE");
+      return true;
     }
   }
 }

@@ -1,8 +1,8 @@
 import java.io.*;
 import java.net.*;
 import controlP5.*;
-String ip_address = "localhost";
-//String ip_address = "192.168.4.1";
+//String ip_address = "localhost";
+String ip_address = "192.168.4.1";
 int port = 23; 
 communication MyComms = new communication();
 bot bot1 = new bot();
@@ -17,8 +17,9 @@ int centerX = 500;
 int centerY = 500;
 float distanceToPixel = 500/500;
 int counter = 0;
-int NOM = 5;
+int NOM = 144;
 int HistorySize = 3;
+boolean isJson;
 BufferedReader reader;
 BufferedWriter writer;
 Socket socket;
@@ -94,15 +95,6 @@ void setup(){
      .setMode(ControlP5.SWITCH)
      ;
      
-     
-       // create a toggle
-  cp5.addToggle("History4")
-     .setPosition(960,880)
-     .setSize(50,20)
-     .setValue(false)
-     .setMode(ControlP5.SWITCH)
-     ;
-  
     try{
       socket = MyComms.initSocket(ip_address, port);
       reader = MyComms.startReader(socket);
@@ -123,14 +115,16 @@ void draw(){
   //debugHistory();
     
 if(receiveMsg != null){
-   dataParse.dataSet(receiveMsg);   
-   println("Winkel: " + dataParse.a + " Distanz: " + dataParse.d + " Heading: " + dataParse.h + " MagX: " + dataParse.x + " MagY: " + dataParse.y + " MagZ: " + dataParse.z + " FrontLaser: " + dataParse.f + " SideLaser: " + dataParse.s );
-   anglesH[counter]= dataParse.a;
-   distancesH[counter] = dataParse.d;
-   distancesHL[counter] = dataParse.f;
-   counter ++;
-   if(counter >= NOM){ 
-     counter =0;
+   isJson =dataParse.dataSet(receiveMsg);
+   if(isJson){
+     println("Winkel: " + dataParse.a + " Distanz: " + dataParse.d + " Heading: " + dataParse.h + " MagX: " + dataParse.x + " MagY: " + dataParse.y + " MagZ: " + dataParse.z + " FrontLaser: " + dataParse.f + " SideLaser: " + dataParse.s  + "FieldStrength " + dataParse.fe);
+     distancesHL[counter] = dataParse.f;
+     distancesH[counter] = dataParse.d;
+     anglesH[counter] = dataParse.a;
+     counter ++;
+     if(counter >= NOM){ 
+       counter =0;
+     }
    }
 }
  
@@ -189,7 +183,6 @@ void Previous(boolean theFlag) {
     cp5.getController("History1").setValue(0);
     cp5.getController("History2").setValue(0);
     cp5.getController("History3").setValue(0);
-    cp5.getController("History4").setValue(0);
   }
 }
 
@@ -199,7 +192,6 @@ void History1(boolean theFlag) {
     cp5.getController("Previous").setValue(0);
     cp5.getController("History2").setValue(0);
     cp5.getController("History3").setValue(0);
-    cp5.getController("History4").setValue(0);
   }
 }
 
@@ -209,7 +201,6 @@ void History2(boolean theFlag) {
     cp5.getController("Previous").setValue(0);
     cp5.getController("History1").setValue(0);
     cp5.getController("History3").setValue(0);
-    cp5.getController("History4").setValue(0);
   }
 }
 
@@ -219,7 +210,6 @@ void History3(boolean theFlag) {
     cp5.getController("Previous").setValue(0);
     cp5.getController("History2").setValue(0);
     cp5.getController("History1").setValue(0);
-    cp5.getController("History4").setValue(0);
   }
 }
 
@@ -227,17 +217,17 @@ void saveDraw(String latestKey){
 
   for(int i = 0; i<NOM; i++){
     switch(latestKey){
-      case "1":
+      case "7":
         anglesH2[i] = anglesH[i];;
         distancesH2[i] = distancesH[i];
         distancesHL2[i] = distancesHL[i];
         break;
-       case "2":
+       case "8":
         anglesH3[i] = anglesH[i];
         distancesH3[i] = distancesH[i];
         distancesHL3[i] = distancesHL[i];
         break;
-       case "3":
+       case "9":
         anglesH4[i] = anglesH[i];
         distancesH4[i] = distancesH[i];
         distancesHL4[i] = distancesHL[i];
@@ -252,7 +242,7 @@ void saveDraw(String latestKey){
 
 void keyPressed(){
   String latestKey= Character.toString(key);
-  if((key != 'v') && (key != '1') && (key != '2') && (key != '3')){
+  if((key != 'v') && (key != '7') && (key != '8') && (key != '9')){
     MyComms.sendMsg(writer, latestKey);
   }else{
     saveDraw(latestKey);
