@@ -13,7 +13,9 @@ class parseCommunication{
 
   
   public boolean dataSet(String message){
-
+  /* A built in processing method is used to decode a string in json format. The object is null if no the input string is nnot in the right format.  
+     This is used to determine if a received message is in json format or just a simple string
+  */
     try{
       json = parseJSONObject(message);
     } catch (Exception e){
@@ -22,7 +24,7 @@ class parseCommunication{
     }
     if (json == null) {
       println(message);
-      return false;
+      return false;                      //return false to let the main program know that no json string was parsed to not increment the counter 
     } else {
       this.a = json.getInt("a");
       this.d = json.getInt("d");

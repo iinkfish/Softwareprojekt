@@ -4,10 +4,13 @@ class lasers {
   public float x;
   public float y;
   String s;
+  
+ 
  public void display(int laserFront, int laserSide){
+   /* Draw front and side laser in the x and y direction without adjusting the angle */
    x = (float)laserSide*distanceToPixel;
    y = (float)laserFront*distanceToPixel;
-   
+   /* Set style and draw the lines with distannce value on screen  */
     stroke(color(255, 0, 0));
     strokeWeight(2);
     line(centerX+xoffset, centerY+yoffset, centerX+xoffset+x, centerY+yoffset);
